@@ -1,0 +1,22 @@
+{
+    "name": "music-slave",
+    "scripts": {
+        "watch": "tsc -w",
+        "dev": "nodemon src/index.js"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.14",
+        "nodemon": "^3.1.10",
+        "typescript": "^5.8.3"
+    },
+    "dependencies": {
+        "@discord-player/extractor": "^7.1.0",
+        "bgutils-js": "^3.2.0",
+        "discord-player": "^7.1.0",
+        "discord-player-youtubei": "^1.4.5",
+        "discord.js": "^14.19.3",
+        "dotenv": "^16.5.0",
+        "ffmpeg-static": "^5.2.0",
+        "mediaplex": "^1.0.0"
+    }
+}
