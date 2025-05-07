@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { player } = require('../player/player.js');
-
+const { cleanQueueMessage } = require('../utils/playerUtils.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
@@ -15,6 +15,7 @@ module.exports = {
         ),
     async execute(interaction) {
         let textChannel;
+        let queue;
         const channel = interaction.member.voice.channel;
         for (const [_, guild] of interaction.client.guilds.cache) {
             const fullGuild = await guild.fetch();
@@ -31,14 +32,32 @@ module.exports = {
         try {
             const { track } = await player.play(channel, url, {
                 nodeOptions: {
-                    metadata: interaction,
+                    metadata: {
+                        interaction,
+                        requestedBy: interaction.member.displayName,
+                        channel,
+                    },
+                    leaveOnEnd: false,
+                    leaveOnStop: false,
+                    leaveOnEmptyCooldown: 5 * 60 * 1000,
                 },
             });
-
-            console.log(track);
-            return interaction.followUp(`**${track.cleanTitle}** enqueued!`);
+            queue = player.nodes.get(interaction.guildId);
+            const embed = new EmbedBuilder()
+                .setTitle(`🎵 ${track.title || track.cleanTitle} added to the queue`)
+                .setURL(track.url)
+                .addFields({
+                    name: 'Currently in queue',
+                    value: `${queue.tracks.size}`,
+                })
+                .setFooter({
+                    text: `Requested by milord ${queue.metadata.requestedBy}`,
+                });
+            return interaction.followUp({ embeds: [embed] });
         } catch (e) {
-            console.log(e);
+            if (e?.code === 'ERR_NO_RESULT') {
+                return interaction.followUp('No results found 🕵🏿');
+            }
             return interaction.followUp(`Something went wrong: ${e}`);
         }
     },
