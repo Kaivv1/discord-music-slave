@@ -14,7 +14,6 @@ const player = new Player(client);
 player.events.on('playerStart', async (queue, track) => {
     const channel = queue.metadata.channel;
     if (!channel) return;
-    const interaction = queue.metadata.interaction;
 
     const buttons = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('resume').setLabel('Resume').setStyle(ButtonStyle.Primary),
@@ -36,12 +35,7 @@ player.events.on('playerStart', async (queue, track) => {
     if (queue.metadata.nowPlayingMessage) cleanQueueMessage(queue);
 
     let nowPlayingMessage;
-    if (interaction.replied || interaction.deferred) {
-        nowPlayingMessage = await interaction.followUp({ embeds: [embed], components: [buttons] });
-    } else {
-        nowPlayingMessage = await interaction.reply({ embeds: [embed], components: [buttons] });
-    }
-
+    nowPlayingMessage = await channel.send({ embeds: [embed], components: [buttons] });
     queue.metadata.nowPlayingMessage = nowPlayingMessage;
 });
 

@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { player } = require('../player/player.js');
-const { cleanQueueMessage } = require('../utils/playerUtils.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
@@ -33,9 +32,8 @@ module.exports = {
             const { track } = await player.play(channel, url, {
                 nodeOptions: {
                     metadata: {
-                        interaction,
                         requestedBy: interaction.member.displayName,
-                        channel,
+                        channel: interaction.channel,
                     },
                     leaveOnEnd: false,
                     leaveOnStop: false,
@@ -43,8 +41,13 @@ module.exports = {
                 },
             });
             queue = player.nodes.get(interaction.guildId);
+            const isPlaylist = track?.playlist && true;
             const embed = new EmbedBuilder()
-                .setTitle(`🎵 ${track.title || track.cleanTitle} added to the queue`)
+                .setTitle(
+                    `🎵 ${
+                        isPlaylist ? `${track.playlist.tracks?.length} tracks` : track.title || track.cleanTitle
+                    } added to the queue`
+                )
                 .setURL(track.url)
                 .addFields({
                     name: 'Currently in queue',
